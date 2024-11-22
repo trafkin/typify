@@ -1,16 +1,16 @@
 #[doc = r" Error types."]
 pub mod error {
     #[doc = r" Error from a TryFrom or FromStr implementation."]
-    pub struct ConversionError(std::borrow::Cow<'static, str>);
-    impl std::error::Error for ConversionError {}
-    impl std::fmt::Display for ConversionError {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-            std::fmt::Display::fmt(&self.0, f)
+    pub struct ConversionError(::std::borrow::Cow<'static, str>);
+    impl ::std::error::Error for ConversionError {}
+    impl ::std::fmt::Display for ConversionError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> Result<(), ::std::fmt::Error> {
+            ::std::fmt::Display::fmt(&self.0, f)
         }
     }
-    impl std::fmt::Debug for ConversionError {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-            std::fmt::Debug::fmt(&self.0, f)
+    impl ::std::fmt::Debug for ConversionError {
+        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> Result<(), ::std::fmt::Error> {
+            ::std::fmt::Debug::fmt(&self.0, f)
         }
     }
     impl From<&'static str> for ConversionError {
@@ -41,6 +41,8 @@ pub mod error {
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
     Clone,
     Copy,
     Debug,
@@ -49,8 +51,6 @@ pub mod error {
     Ord,
     PartialEq,
     PartialOrd,
-    serde :: Deserialize,
-    serde :: Serialize,
 )]
 pub enum AlternativeEnum {
     Choice1,
@@ -62,12 +62,12 @@ impl From<&AlternativeEnum> for AlternativeEnum {
         value.clone()
     }
 }
-impl ToString for AlternativeEnum {
-    fn to_string(&self) -> String {
+impl ::std::fmt::Display for AlternativeEnum {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
-            Self::Choice1 => "Choice1".to_string(),
-            Self::Choice2 => "Choice2".to_string(),
-            Self::Choice3 => "Choice3".to_string(),
+            Self::Choice1 => write!(f, "Choice1"),
+            Self::Choice2 => write!(f, "Choice2"),
+            Self::Choice3 => write!(f, "Choice3"),
         }
     }
 }
@@ -133,6 +133,8 @@ impl Default for AlternativeEnum {
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
     Clone,
     Copy,
     Debug,
@@ -141,8 +143,6 @@ impl Default for AlternativeEnum {
     Ord,
     PartialEq,
     PartialOrd,
-    serde :: Deserialize,
-    serde :: Serialize,
 )]
 pub enum CommentedVariants {
     #[doc = "An A"]
@@ -157,12 +157,12 @@ impl From<&CommentedVariants> for CommentedVariants {
         value.clone()
     }
 }
-impl ToString for CommentedVariants {
-    fn to_string(&self) -> String {
+impl ::std::fmt::Display for CommentedVariants {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
-            Self::A => "A".to_string(),
-            Self::B => "B".to_string(),
-            Self::C => "C".to_string(),
+            Self::A => write!(f, "A"),
+            Self::B => write!(f, "B"),
+            Self::C => write!(f, "C"),
         }
     }
 }
@@ -223,7 +223,7 @@ impl std::convert::TryFrom<String> for CommentedVariants {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 pub struct DiskAttachment {
     pub alternate: AlternativeEnum,
     pub state: DiskAttachmentState,
@@ -250,6 +250,8 @@ impl From<&DiskAttachment> for DiskAttachment {
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
     Clone,
     Copy,
     Debug,
@@ -258,8 +260,6 @@ impl From<&DiskAttachment> for DiskAttachment {
     Ord,
     PartialEq,
     PartialOrd,
-    serde :: Deserialize,
-    serde :: Serialize,
 )]
 pub enum DiskAttachmentState {
     Detached,
@@ -271,12 +271,12 @@ impl From<&DiskAttachmentState> for DiskAttachmentState {
         value.clone()
     }
 }
-impl ToString for DiskAttachmentState {
-    fn to_string(&self) -> String {
+impl ::std::fmt::Display for DiskAttachmentState {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
-            Self::Detached => "Detached".to_string(),
-            Self::Destroyed => "Destroyed".to_string(),
-            Self::Faulted => "Faulted".to_string(),
+            Self::Detached => write!(f, "Detached"),
+            Self::Destroyed => write!(f, "Destroyed"),
+            Self::Faulted => write!(f, "Faulted"),
         }
     }
 }
@@ -332,7 +332,7 @@ impl Default for DiskAttachmentState {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 pub struct EmptyObject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub prop: Option<EmptyObjectProp>,
@@ -355,15 +355,15 @@ impl From<&EmptyObject> for EmptyObject {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Serialize)]
-pub struct EmptyObjectProp(serde_json::Map<String, serde_json::Value>);
-impl std::ops::Deref for EmptyObjectProp {
-    type Target = serde_json::Map<String, serde_json::Value>;
-    fn deref(&self) -> &serde_json::Map<String, serde_json::Value> {
+#[derive(:: serde :: Serialize, Clone, Debug)]
+pub struct EmptyObjectProp(::serde_json::Map<String, ::serde_json::Value>);
+impl ::std::ops::Deref for EmptyObjectProp {
+    type Target = ::serde_json::Map<String, ::serde_json::Value>;
+    fn deref(&self) -> &::serde_json::Map<String, ::serde_json::Value> {
         &self.0
     }
 }
-impl From<EmptyObjectProp> for serde_json::Map<String, serde_json::Value> {
+impl From<EmptyObjectProp> for ::serde_json::Map<String, ::serde_json::Value> {
     fn from(value: EmptyObjectProp) -> Self {
         value.0
     }
@@ -373,10 +373,10 @@ impl From<&EmptyObjectProp> for EmptyObjectProp {
         value.clone()
     }
 }
-impl std::convert::TryFrom<serde_json::Map<String, serde_json::Value>> for EmptyObjectProp {
+impl std::convert::TryFrom<::serde_json::Map<String, ::serde_json::Value>> for EmptyObjectProp {
     type Error = self::error::ConversionError;
     fn try_from(
-        value: serde_json::Map<String, serde_json::Value>,
+        value: ::serde_json::Map<String, ::serde_json::Value>,
     ) -> Result<Self, self::error::ConversionError> {
         if ![[].into_iter().collect()].contains(&value) {
             Err("invalid value".into())
@@ -385,15 +385,13 @@ impl std::convert::TryFrom<serde_json::Map<String, serde_json::Value>> for Empty
         }
     }
 }
-impl<'de> serde::Deserialize<'de> for EmptyObjectProp {
+impl<'de> ::serde::Deserialize<'de> for EmptyObjectProp {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: ::serde::Deserializer<'de>,
     {
-        Self::try_from(<serde_json::Map<String, serde_json::Value>>::deserialize(
-            deserializer,
-        )?)
-        .map_err(|e| <D::Error as serde::de::Error>::custom(e.to_string()))
+        Self::try_from(<::serde_json::Map<String, ::serde_json::Value>>::deserialize(deserializer)?)
+            .map_err(|e| <D::Error as ::serde::de::Error>::custom(e.to_string()))
     }
 }
 #[doc = "EnumAndConstant"]
@@ -473,7 +471,7 @@ impl<'de> serde::Deserialize<'de> for EmptyObjectProp {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(tag = "petType")]
 pub enum EnumAndConstant {
     #[serde(rename = "dog")]
@@ -518,7 +516,7 @@ impl From<&EnumAndConstant> for EnumAndConstant {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum IpNet {
     V4(Ipv4Net),
@@ -559,11 +557,11 @@ impl std::convert::TryFrom<String> for IpNet {
         value.parse()
     }
 }
-impl ToString for IpNet {
-    fn to_string(&self) -> String {
+impl ::std::fmt::Display for IpNet {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
-            Self::V4(x) => x.to_string(),
-            Self::V6(x) => x.to_string(),
+            Self::V4(x) => x.fmt(f),
+            Self::V6(x) => x.fmt(f),
         }
     }
 }
@@ -588,10 +586,18 @@ impl From<Ipv6Net> for IpNet {
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde :: Deserialize, serde :: Serialize,
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
 )]
 pub struct Ipv4Net(pub String);
-impl std::ops::Deref for Ipv4Net {
+impl ::std::ops::Deref for Ipv4Net {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
@@ -618,9 +624,9 @@ impl std::str::FromStr for Ipv4Net {
         Ok(Self(value.to_string()))
     }
 }
-impl ToString for Ipv4Net {
-    fn to_string(&self) -> String {
-        self.0.to_string()
+impl ::std::fmt::Display for Ipv4Net {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 #[doc = "Ipv6Net"]
@@ -634,10 +640,18 @@ impl ToString for Ipv4Net {
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde :: Deserialize, serde :: Serialize,
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
 )]
 pub struct Ipv6Net(pub String);
-impl std::ops::Deref for Ipv6Net {
+impl ::std::ops::Deref for Ipv6Net {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
@@ -664,9 +678,9 @@ impl std::str::FromStr for Ipv6Net {
         Ok(Self(value.to_string()))
     }
 }
-impl ToString for Ipv6Net {
-    fn to_string(&self) -> String {
-        self.0.to_string()
+impl ::std::fmt::Display for Ipv6Net {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 #[doc = "JankNames"]
@@ -701,25 +715,25 @@ impl ToString for Ipv6Net {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum JankNames {
     Variant0(String),
-    Variant1(std::collections::HashMap<String, String>),
-    Variant2(std::collections::HashMap<String, i64>),
+    Variant1(::std::collections::HashMap<String, String>),
+    Variant2(::std::collections::HashMap<String, i64>),
 }
 impl From<&JankNames> for JankNames {
     fn from(value: &JankNames) -> Self {
         value.clone()
     }
 }
-impl From<std::collections::HashMap<String, String>> for JankNames {
-    fn from(value: std::collections::HashMap<String, String>) -> Self {
+impl From<::std::collections::HashMap<String, String>> for JankNames {
+    fn from(value: ::std::collections::HashMap<String, String>) -> Self {
         Self::Variant1(value)
     }
 }
-impl From<std::collections::HashMap<String, i64>> for JankNames {
-    fn from(value: std::collections::HashMap<String, i64>) -> Self {
+impl From<::std::collections::HashMap<String, i64>> for JankNames {
+    fn from(value: ::std::collections::HashMap<String, i64>) -> Self {
         Self::Variant2(value)
     }
 }
@@ -732,6 +746,8 @@ impl From<std::collections::HashMap<String, i64>> for JankNames {
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
     Clone,
     Copy,
     Debug,
@@ -740,8 +756,6 @@ impl From<std::collections::HashMap<String, i64>> for JankNames {
     Ord,
     PartialEq,
     PartialOrd,
-    serde :: Deserialize,
-    serde :: Serialize,
 )]
 #[serde(deny_unknown_fields)]
 pub enum Never {}
@@ -759,6 +773,8 @@ impl From<&Never> for Never {
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
     Clone,
     Copy,
     Debug,
@@ -767,8 +783,6 @@ impl From<&Never> for Never {
     Ord,
     PartialEq,
     PartialOrd,
-    serde :: Deserialize,
-    serde :: Serialize,
 )]
 #[serde(deny_unknown_fields)]
 pub enum NeverEver {}
@@ -796,9 +810,9 @@ impl From<&NeverEver> for NeverEver {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 pub struct NullStringEnumWithUnknownFormat(pub Option<NullStringEnumWithUnknownFormatInner>);
-impl std::ops::Deref for NullStringEnumWithUnknownFormat {
+impl ::std::ops::Deref for NullStringEnumWithUnknownFormat {
     type Target = Option<NullStringEnumWithUnknownFormatInner>;
     fn deref(&self) -> &Option<NullStringEnumWithUnknownFormatInner> {
         &self.0
@@ -836,6 +850,8 @@ impl From<Option<NullStringEnumWithUnknownFormatInner>> for NullStringEnumWithUn
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
     Clone,
     Copy,
     Debug,
@@ -844,8 +860,6 @@ impl From<Option<NullStringEnumWithUnknownFormatInner>> for NullStringEnumWithUn
     Ord,
     PartialEq,
     PartialOrd,
-    serde :: Deserialize,
-    serde :: Serialize,
 )]
 pub enum NullStringEnumWithUnknownFormatInner {
     #[serde(rename = "a")]
@@ -860,12 +874,12 @@ impl From<&NullStringEnumWithUnknownFormatInner> for NullStringEnumWithUnknownFo
         value.clone()
     }
 }
-impl ToString for NullStringEnumWithUnknownFormatInner {
-    fn to_string(&self) -> String {
+impl ::std::fmt::Display for NullStringEnumWithUnknownFormatInner {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
-            Self::A => "a".to_string(),
-            Self::B => "b".to_string(),
-            Self::C => "c".to_string(),
+            Self::A => write!(f, "a"),
+            Self::B => write!(f, "b"),
+            Self::C => write!(f, "c"),
         }
     }
 }
@@ -930,7 +944,7 @@ impl std::convert::TryFrom<String> for NullStringEnumWithUnknownFormatInner {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 pub enum OneOfTypes {
     #[serde(rename = "bar")]
     Bar(i64),
@@ -958,10 +972,18 @@ impl From<i64> for OneOfTypes {
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde :: Deserialize, serde :: Serialize,
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
 )]
 pub struct ReferenceDef(pub String);
-impl std::ops::Deref for ReferenceDef {
+impl ::std::ops::Deref for ReferenceDef {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
@@ -988,9 +1010,9 @@ impl std::str::FromStr for ReferenceDef {
         Ok(Self(value.to_string()))
     }
 }
-impl ToString for ReferenceDef {
-    fn to_string(&self) -> String {
-        self.0.to_string()
+impl ::std::fmt::Display for ReferenceDef {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 #[doc = "issue 280"]
@@ -1025,11 +1047,11 @@ impl ToString for ReferenceDef {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum References {
     Variant0(Vec<String>),
-    Variant1(std::collections::HashMap<String, ReferencesVariant1Value>),
+    Variant1(::std::collections::HashMap<String, ReferencesVariant1Value>),
 }
 impl From<&References> for References {
     fn from(value: &References) -> Self {
@@ -1041,8 +1063,8 @@ impl From<Vec<String>> for References {
         Self::Variant0(value)
     }
 }
-impl From<std::collections::HashMap<String, ReferencesVariant1Value>> for References {
-    fn from(value: std::collections::HashMap<String, ReferencesVariant1Value>) -> Self {
+impl From<::std::collections::HashMap<String, ReferencesVariant1Value>> for References {
+    fn from(value: ::std::collections::HashMap<String, ReferencesVariant1Value>) -> Self {
         Self::Variant1(value)
     }
 }
@@ -1063,7 +1085,7 @@ impl From<std::collections::HashMap<String, ReferencesVariant1Value>> for Refere
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum ReferencesVariant1Value {
     StringVersion(StringVersion),
@@ -1104,11 +1126,11 @@ impl std::convert::TryFrom<String> for ReferencesVariant1Value {
         value.parse()
     }
 }
-impl ToString for ReferencesVariant1Value {
-    fn to_string(&self) -> String {
+impl ::std::fmt::Display for ReferencesVariant1Value {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
-            Self::StringVersion(x) => x.to_string(),
-            Self::ReferenceDef(x) => x.to_string(),
+            Self::StringVersion(x) => x.fmt(f),
+            Self::ReferenceDef(x) => x.fmt(f),
         }
     }
 }
@@ -1152,7 +1174,7 @@ impl From<ReferenceDef> for ReferencesVariant1Value {
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
-#[derive(Clone, Debug, serde :: Deserialize, serde :: Serialize)]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum ShouldBeExclusive {
     Variant0 { id: String },
@@ -1174,10 +1196,18 @@ impl From<&ShouldBeExclusive> for ShouldBeExclusive {
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde :: Deserialize, serde :: Serialize,
+    :: serde :: Deserialize,
+    :: serde :: Serialize,
+    Clone,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
 )]
 pub struct StringVersion(pub String);
-impl std::ops::Deref for StringVersion {
+impl ::std::ops::Deref for StringVersion {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
@@ -1204,9 +1234,9 @@ impl std::str::FromStr for StringVersion {
         Ok(Self(value.to_string()))
     }
 }
-impl ToString for StringVersion {
-    fn to_string(&self) -> String {
-        self.0.to_string()
+impl ::std::fmt::Display for StringVersion {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 fn main() {}
