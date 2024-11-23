@@ -161,6 +161,35 @@ pub(crate) enum Name {
     Unknown,
 }
 
+
+#[derive(Debug,Clone)]
+struct PathComponents {
+    pub parent: String,
+    pub type_name: String,
+    pub index: Option<usize>,
+}
+
+impl PathComponents {
+    fn from_string(input: &str) -> Option<Self> {
+        // Split the input string by '/'
+        let parts: Vec<&str> = input.split('/').collect();
+
+        // Check if we have enough parts
+        if parts.len() < 4 {
+            return None; // Not enough parts to extract parent, type, and index
+        }
+
+        // Extracting relevant components
+        let parent = parts[2].to_string(); // Parent is at index 2
+        let type_name = parts[3].to_string(); // Type is at index 3
+        
+        // Attempt to parse the index as usize
+        let index = parts.get(4).and_then(|&s| s.parse::<usize>().ok());
+
+        Some(PathComponents { parent, type_name, index })
+    }
+}
+
 impl Name {
     pub fn into_option(self) -> Option<String> {
         match self {
@@ -838,7 +867,7 @@ impl TypeSpace {
         }
 
         // merge internal and external schemas
-        defs.extend(ext_refs.into_iter());
+        defs.extend(ext_refs);
 
         if self.distinct_definitions {
             // recursevely distinct definition to strip count of definitions
@@ -1271,7 +1300,7 @@ fn fetch_external_definitions(
     first_run: bool, // Flag to indicate if this is the first run of the function
 ) {
     // Iterate through each reference found in the given schema definition
-    for mut reference in get_references(&definition) {
+    for mut reference in get_references(definition) {
         if reference.is_empty() {
             continue; // Skip empty references
         }
@@ -1284,33 +1313,36 @@ fn fetch_external_definitions(
             reference.remove(0); // Remove the '#' character from the reference
             let fragment = reference
                 .split("/")
-                .into_iter()
                 .map(|s| s.to_string())
                 .filter(|s| !s.is_empty())
                 .collect(); // Split and collect the reference into a vector of strings
-            let definition_schema = fetch_defenition(base_schema, &reference, &fragment); // Fetch the internal schema definition
+           
+            let definition_schema = fetch_definition(base_schema, &reference, &fragment); // Fetch the internal schema definition
             let k = format!("{}{}", base_id.as_ref().unwrap(), reference); // Create a key for the reference
             let key = RefKey::Def(k);
-            if external_references.contains_key(&key) {
-                continue; // Skip if the reference already exists in the map
-            } else {
-                // Insert the reference into the map and recursively fetch external definitions
-                external_references.insert(
-                    key,
-                    (
-                        definition_schema.clone(),
-                        base_path.clone(),
-                        base_id.clone(),
-                    ),
-                );
-                fetch_external_definitions(
-                    base_schema,
-                    &definition_schema,
-                    base_path,
-                    base_id,
-                    external_references,
-                    false,
-                );
+            match external_references.contains_key(&key) {
+                true => {
+                    continue; // Skip if the reference already exists in the map
+                }
+                false => {
+                            // Insert the reference into the map and recursively fetch external definitions
+                            external_references.insert(
+                                key,
+                                (
+                                    definition_schema.clone(),
+                                    base_path.clone(),
+                                    base_id.clone(),
+                                ),
+                            );
+                            fetch_external_definitions(
+                                base_schema,
+                                &definition_schema,
+                                base_path,
+                                base_id,
+                                external_references,
+                                false,
+                            );
+                        }
             }
         } else {
             // Handle external references
@@ -1318,6 +1350,7 @@ fn fetch_external_definitions(
                 .as_ref()
                 .expect("missing 'id' attribute in schema definition"); // Ensure base_id is present
             let id = Iri::new(base_id).unwrap(); // Create an IRI from the base ID
+            //dbg!(&reference);
             let reff = Iri::new(&reference).unwrap(); // Create an IRI from the reference
             let fragment = reff
                 .fragment()
@@ -1337,7 +1370,7 @@ fn fetch_external_definitions(
 
             let root_schema = serde_json::from_str::<RootSchema>(&content)
                 .expect("Failed to parse input file as JSON Schema"); // Parse the file content as JSON Schema
-            let definition_schema = fetch_defenition(&root_schema, &reference, &fragment); // Fetch the external schema definition
+            let definition_schema = fetch_definition(&root_schema, &reference, &fragment); // Fetch the external schema definition
             let key = RefKey::Def(reference.clone());
             if external_references.contains_key(&key) {
                 continue; // Skip if the reference already exists in the map
@@ -1362,33 +1395,64 @@ fn fetch_external_definitions(
     }
 }
 
-fn fetch_defenition(
+fn fetch_definition(
     base_schema: &RootSchema,
     reference: &String,
     fragment: &Vec<String>,
 ) -> Schema {
+    //dbg!(&base_schema);
+    //dbg!(&reference);
     if fragment.is_empty() {
         return Schema::Object(base_schema.schema.clone());
     }
     let definition_schema = if fragment[0] == "definitions" {
-        base_schema
-            .definitions
-            .get(
-                reference
-                    .split('/')
-                    .last()
-                    .expect("unexpected end of reference"),
-            )
-            .unwrap()
-            .clone()
+
+      // Remove the prefix '#/' before parsing
+        let input = match reference.split_once("#") {
+            None => reference,
+            Some((_,right)) => right
+        };
+        //let trimmed_input = reference.trim_start_matches("#/");
+        
+        // Parse the string into components
+        match PathComponents::from_string(input) {
+            Some(components) => {
+                println!("Parsed Components: {:?}", components);
+                base_schema
+                    .definitions
+                    .get(components.parent.as_str()).and_then(|obj|{
+
+                    let subschemas =  obj.clone().into_object().subschemas.unwrap();
+                    let sch = match components.type_name.as_str() {
+                        "allOf" => subschemas.all_of.zip(components.index).map(|(schemas,i)| schemas[i].clone()),
+                        "anyOf" => subschemas.any_of.zip(components.index).map(|(schemas,i)| schemas[i].clone()),
+                        "one_of" => subschemas.one_of.zip(components.index).map(|(schemas,i)| schemas[i].clone()),
+                        _ => None
+                    };
+                    sch.clone()
+            })
+
+            },
+            None => {
+
+                let bs= base_schema
+                    .definitions
+                    .get(reference.split("/").last().unwrap());
+                //println!("Failed to parse the input string.");
+                bs.map(|s|s.clone())
+            }
+        }
+
+
+
     } else {
-        let mut value = base_schema.schema.extensions.get(&fragment[0]).unwrap();
+         let mut value = base_schema.schema.extensions.get(&fragment[0]).unwrap();
         for x in fragment.iter().skip(1) {
             value = value.as_object().unwrap().get(x).unwrap();
         }
         serde_json::from_value(value.clone()).unwrap()
     };
-    definition_schema
+    definition_schema.unwrap().clone()
 }
 
 fn get_references(schema: &Schema) -> Vec<String> {
@@ -1420,6 +1484,7 @@ fn get_references(schema: &Schema) -> Vec<String> {
                 }
                 result.extend(pattern_refs);
             }
+
             if let Some(o) = &obj.array {
                 result.extend(
                     o.contains
@@ -1535,6 +1600,7 @@ fn format_reference(schema: &mut Schema, id: &Option<String>, base_id: &Option<S
     match schema {
         Schema::Bool(_) => {}
         Schema::Object(obj) => {
+
             obj.reference.as_mut().map(|reference| {
                 let mut r = reference.clone();
                 if r.starts_with("#") {
@@ -1543,6 +1609,7 @@ fn format_reference(schema: &mut Schema, id: &Option<String>, base_id: &Option<S
                     }
                     r = id.clone().unwrap();
                 }
+// NOTE: too many unwrap
                 let b_id = base_id.clone().unwrap();
                 let id = Iri::new(&b_id).unwrap(); // path + last ref
                 let reff = Iri::new(&r).unwrap();

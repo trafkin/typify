@@ -1287,7 +1287,7 @@ impl TypeSpace {
         let type_id = self
             .ref_to_id
             .get(&key)
-            .unwrap_or_else(|| panic!("$ref {} is missing", ref_name));
+            .unwrap_or_else(|| panic!("$ref {} is missing", ref_name) );
         Ok((
             TypeEntryDetails::Reference(type_id.clone()).into(),
             metadata,
